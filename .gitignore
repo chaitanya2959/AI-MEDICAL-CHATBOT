@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+venv/
+backend/venv/
+
+# Database
+medical_ai.db
+db.sqlite3
+
+# Frontend
+node_modules/
+.next/
+
+# IDE
+.vscode/
+.idea/
