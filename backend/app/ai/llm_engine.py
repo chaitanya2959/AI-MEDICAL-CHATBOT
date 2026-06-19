@@ -1,12 +1,11 @@
-from groq import Groq
-import os
+from dotenv import load_dotenv
+load_dotenv()
 
-from app.rag.retriever import (
-    retrieve_medical_context
-)
+import os
+from groq import Groq
+from app.rag.retriever import retrieve_medical_context
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 
 def medical_chat(prompt):
 
