@@ -2,14 +2,19 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 
 SECRET_KEY = "medical_ai_secret_key"
+
 ALGORITHM = "HS256"
+
+ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 
 def create_access_token(data: dict):
 
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(hours=24)
+    expire = datetime.utcnow() + timedelta(
+        hours=ACCESS_TOKEN_EXPIRE_HOURS
+    )
 
     to_encode.update({
         "exp": expire

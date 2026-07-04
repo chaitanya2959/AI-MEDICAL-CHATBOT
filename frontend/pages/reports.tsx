@@ -2,85 +2,321 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { uploadReport } from "../lib/api";
+import {
+  UploadCloud,
+  FileText,
+  CheckCircle2,
+  Eye,
+  Trash2,
+  Sparkles,
+} from "lucide-react";
 
-export default function ReportsPage() {
-const [file, setFile] = useState<File | null>(null);
-const [message, setMessage] = useState("");
-const [loading, setLoading] = useState(false);
+export default function Reports() {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [analysis, setAnalysis] = useState("");
 
-const handleUpload = async () => {
-if (!file) {
-setMessage("Please select a PDF file.");
-return;
-}
+  const [reports, setReports] = useState([
+    {
+      id: 1,
+      filename: "Blood_Report.pdf",
+      date: "Today",
+    },
+    {
+      id: 2,
+      filename: "CBC_Report.pdf",
+      date: "Yesterday",
+    },
+  ]);
 
+  const upload = async () => {
+    if (!file) return;
 
-setLoading(true);
-setMessage("");
+    setLoading(true);
 
-try {
-  const res = await uploadReport(file);
+    try {
+      const res = await uploadReport(file);
 
-  console.log(res.data);
+      setAnalysis(res.data.analysis);
 
-  setMessage(
-    res.data.analysis ||
-    "Report analyzed successfully."
-  );
-} catch (err: any) {
-  console.error(err);
+      setReports((prev) => [
+        {
+          id: Date.now(),
+          filename: file.name,
+          date: "Just Now",
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
 
-  setMessage(
-    err?.response?.data?.detail ||
-    err?.response?.data?.message ||
-    "Failed to upload PDF."
-  );
-} finally {
-  setLoading(false);
-}
+    setLoading(false);
+  };
 
+  const deleteReport = (id: number) => {
+    setReports((prev) => prev.filter((r) => r.id !== id));
+  };
 
-};
+  return (
+    <div className="flex min-h-screen bg-slate-100">
 
-return ( <div className="flex min-h-screen bg-slate-100"> <Sidebar />
+      <Sidebar />
 
+      <main className="flex-1 ml-72">
 
-  <main className="flex-1">
-    <Topbar />
+        <Topbar />
 
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Medical Reports
-      </h1>
+        <div className="pt-24 px-8 pb-10 space-y-8">
 
-      <div className="bg-white rounded-2xl shadow p-6">
-        <input
-          type="file"
-          accept=".pdf"
-          onChange={(e) =>
-            setFile(e.target.files?.[0] || null)
-          }
-          className="mb-4 block"
-        />
+          {/* Header */}
 
-        <button
-          onClick={handleUpload}
-          disabled={loading}
-          className="bg-cyan-600 text-white px-5 py-2 rounded-xl hover:bg-cyan-700"
-        >
-          {loading ? "Uploading..." : "Upload Report"}
-        </button>
+          <div className="flex items-center justify-between">
 
-        {message && (
-          <div className="mt-6 p-4 rounded-lg bg-slate-100 whitespace-pre-wrap">
-            {message}
+            <div>
+
+              <h1 className="text-4xl font-bold text-slate-800">
+                Medical Reports
+              </h1>
+
+              <p className="text-slate-500 mt-2">
+                Upload PDF reports and receive AI powered analysis.
+              </p>
+
+            </div>
+
+            <div className="bg-cyan-600 text-white px-6 py-3 rounded-2xl shadow-lg font-semibold">
+              {reports.length} Reports
+            </div>
+
           </div>
-        )}
-      </div>
+
+          {/* Upload Card */}
+
+          <div className="rounded-3xl overflow-hidden shadow-2xl">
+
+            <div className="bg-gradient-to-r from-cyan-600 to-blue-700 p-10 text-white">
+
+              <div className="flex items-center gap-4">
+
+                <div className="bg-white/20 p-5 rounded-full">
+
+                  <UploadCloud size={45} />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-3xl font-bold">
+                    Upload Medical Report
+                  </h2>
+
+                  <p className="text-cyan-100 mt-1">
+                    Upload PDF files for AI based medical analysis.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4 items-center">
+
+                <input
+                  hidden
+                  id="pdf"
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) =>
+                    setFile(e.target.files?.[0] || null)
+                  }
+                />
+
+                <label
+                  htmlFor="pdf"
+                  className="cursor-pointer bg-white text-cyan-700 px-8 py-3 rounded-xl font-semibold hover:scale-105 transition"
+                >
+                  Browse PDF
+                </label>
+
+                <button
+                  onClick={upload}
+                  disabled={loading}
+                  className="bg-black/20 hover:bg-black/30 px-8 py-3 rounded-xl font-semibold transition"
+                >
+                  {loading ? "Analyzing..." : "Analyze Report"}
+                </button>
+
+              </div>
+
+              {file && (
+
+                <div className="mt-6 bg-white/20 rounded-2xl p-5 flex items-center gap-4">
+
+                  <FileText size={30} />
+
+                  <div>
+
+                    <p className="font-semibold">
+                      {file.name}
+                    </p>
+
+                    <p className="text-sm text-cyan-100">
+                      Ready for AI Analysis
+                    </p>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+                    {/* AI Analysis */}
+
+          {analysis && (
+
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+              <div className="bg-gradient-to-r from-emerald-500 to-cyan-600 p-5">
+
+                <div className="flex items-center gap-4">
+
+                  <div className="bg-white/20 p-3 rounded-full">
+
+                    <Sparkles className="text-white" size={28} />
+
+                  </div>
+
+                  <div>
+
+                    <h2 className="text-2xl font-bold text-white">
+                      AI Medical Analysis
+                    </h2>
+
+                    <p className="text-cyan-100">
+                      Generated by AI
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="p-8">
+
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+
+                  <pre className="whitespace-pre-wrap leading-8 text-slate-700 font-sans">
+                    {analysis}
+                  </pre>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          )}
+
+          {/* Recent Reports */}
+
+          <div>
+
+            <div className="flex items-center justify-between mb-6">
+
+              <h2 className="text-3xl font-bold text-slate-800">
+                Recent Reports
+              </h2>
+
+              <span className="text-slate-500">
+                {reports.length} Files
+              </span>
+
+            </div>
+
+            <div className="space-y-5">
+
+              {reports.map((report) => (
+
+                <div
+                  key={report.id}
+                  className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 flex items-center justify-between"
+                >
+
+                  {/* Left */}
+
+                  <div className="flex items-center gap-5">
+
+                    <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-4 rounded-2xl text-white">
+
+                      <FileText size={28} />
+
+                    </div>
+
+                    <div>
+
+                      <h3 className="text-xl font-semibold text-slate-800">
+                        {report.filename}
+                      </h3>
+
+                      <p className="text-slate-500 mt-1">
+                        Uploaded : {report.date}
+                      </p>
+
+                      <div className="mt-3 inline-flex items-center gap-2 text-green-600 font-medium">
+
+                        <CheckCircle2 size={18} />
+
+                        AI Analysis Completed
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* Right */}
+
+                  <div className="flex gap-3">
+
+                    <button
+                      className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition shadow-lg"
+                    >
+                      <Eye size={18} />
+
+                      View
+
+                    </button>
+
+                    <button
+                      onClick={() => deleteReport(report.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition shadow-lg"
+                    >
+                      <Trash2 size={18} />
+
+                      Delete
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+
     </div>
-  </main>
-</div>
 
+  );
 
-);
 }
